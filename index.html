@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz do Comportamento Humano</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(to right, #6a11cb, #2575fc);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      color: #333;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    #quiz-container {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      padding: 5vw;
+      max-width: 90vw;
+      width: 100%;
+      transition: transform 0.3s ease;
+      box-sizing: border-box;
+    }
+    #quiz-container:hover {
+      transform: scale(1.02);
+    }
+    h1 {
+      text-align: center;
+      color: #6a11cb;
+      font-size: clamp(1.5rem, 5vw, 2rem);
+      margin-bottom: 4vw;
+    }
+    #question {
+      font-size: clamp(1rem, 3.5vw, 1.3rem);
+      margin-bottom: 5vw;
+      line-height: 1.4;
+    }
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+    }
+    .btn {
+      padding: clamp(8px, 2.5vw, 12px) clamp(15px, 4vw, 25px);
+      font-size: clamp(0.9rem, 3vw, 1.1rem);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      touch-action: manipulation;
+    }
+    #true-btn {
+      background-color: #4CAF50;
+      color: white;
+    }
+    #true-btn:hover {
+      background-color: #45a049;
+      transform: translateY(-2px);
+    }
+    #false-btn {
+      background-color: #f44336;
+      color: white;
+    }
+    #false-btn:hover {
+      background-color: #da190b;
+      transform: translateY(-2px);
+    }
+    #feedback {
+      margin-top: 3vw;
+      font-size: clamp(1rem, 3.2vw, 1.2rem);
+      display: none;
+      text-align: center;
+    }
+    #next-btn {
+      display: none;
+      margin: 4vw auto 0;
+      background-color: #2196F3;
+      color: white;
+      padding: clamp(8px, 2.5vw, 10px) clamp(20px, 5vw, 30px);
+    }
+    #next-btn:hover {
+      background-color: #0b7dda;
+      transform: translateY(-2px);
+    }
+    #score {
+      text-align: center;
+      font-size: clamp(0.9rem, 2.8vw, 1.1rem);
+      margin-top: 4vw;
+      color: #555;
+    }
+    #result {
+      display: none;
+      text-align: center;
+    }
+    #result p {
+      font-size: clamp(1rem, 3.5vw, 1.3rem);
+      margin: 2vw 0;
+    }
+    #play-again-btn {
+      background-color: #FFC107;
+      color: white;
+      margin-top: 4vw;
+      padding: clamp(8px, 2.5vw, 10px) clamp(20px, 5vw, 30px);
+    }
+    #play-again-btn:hover {
+      background-color: #e0a800;
+      transform: translateY(-2px);
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Mobile-specific adjustments */
+    @media (max-width: 600px) {
+      .button-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      .button-container .btn {
+        width: 80%;
+      }
+      #next-btn, #play-again-btn {
+        width: 80%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="quiz-container">
+    <h1>Quiz do Comportamento Humano</h1>
+    <div id="question"></div>
+    <div class="button-container">
+      <button id="true-btn" class="btn">Verdadeiro</button>
+      <button id="false-btn" class="btn">Falso</button>
+    </div>
+    <div id="feedback"></div>
+    <button id="next-btn" class="btn">Próxima</button>
+    <div id="score">Acertos: 0 / Total: 0</div>
+    <div id="result">
+      <p id="result-text"></p>
+      <button id="play-again-btn" class="btn">Jogar Novamente</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      { question: "As pessoas adoram ser corrigidas, é o hobby favorito delas", correct: "F" },
+      { question: "Todo mundo ama trabalho em grupo, ‘união é força’, né?", correct: "F" },
+      { question: "Humanos são ótimos em admitir erros, sem ego no meio", correct: "F" },
+      { question: "Chorar em público é puro sinal de força, nada estranho", correct: "F" },
+      { question: "Todo mundo encara rejeição como profissional, zero drama", correct: "F" },
+      { question: "As pessoas nunca fofocam, são santinhas demais pra isso", correct: "F" },
+      { question: "Aulas de controle da raiva são só diversão, ninguém precisa", correct: "F" },
+      { question: "Humanos sempre falam o que pensam, sem rodeios", correct: "F" },
+      { question: "Procrastinação não existe, somos todos máquinas de produtividade", correct: "F" },
+      { question: "Ciúmes? Nunca ouvi falar, humanos são superiores", correct: "F" },
+      { question: "As pessoas amam filas, é adrenalina pura", correct: "F" },
+      { question: "Todo mundo é matinal, 6 da manhã é o melhor horário", correct: "F" },
+      { question: "Timidez é só um jeito chique de dizer ‘sou enigmático’", correct: "F" },
+      { question: "Humanos nunca exageram, são calmos o tempo todo", correct: "F" },
+      { question: "Elogios deixam todo mundo desconfortável, fato científico", correct: "F" },
+      { question: "Todos adoramos um confronto, bora resolver na hora!", correct: "F" },
+      { question: "Ninguém é teimoso, somos todos maleáveis", correct: "F" },
+      { question: "Mudar de ideia é fácil pras pessoas, sem crise", correct: "F" },
+      { question: "Risos são contagiosos, tristeza nem tanto", correct: "F" },
+      { question: "Humanos nunca guardam rancor, são todos anjos", correct: "F" },
+      { question: "Ficar ‘hangry’ é lorota, comida é opcional", correct: "F" },
+      { question: "Todo mundo é honesto sempre, mentir é coisa de outro planeta", correct: "F" },
+      { question: "Impaciência é qualidade, esperar é pra trouxa", correct: "F" },
+      { question: "Todos adoramos críticas, é como ganhar doce", correct: "F" },
+      { question: "As pessoas nunca fingem sorrisos, é tudo genuíno", correct: "F" },
+      { question: "Multidões são um abraço quentinho pra todo mundo", correct: "F" },
+      { question: "Humanos esquecem o passado rapidinho, mestres do desapego", correct: "F" },
+      { question: "Ninguém é passivo-agressivo, somos diretos pra caramba", correct: "F" },
+      { question: "Ansiedade? Aqui não, somos todos zen", correct: "F" },
+      { question: "As pessoas adoram ser ignoradas, é um afago no ego", correct: "F" },
+      { question: "Somos todos ouvintes perfeitos, nunca dispersos", correct: "F" },
+      { question: "Humanos nunca exageram, isso é impossível", correct: "F" },
+      { question: "Todo mundo aceita mudanças numa boa, sem drama", correct: "F" },
+      { question: "Drama segue algumas pessoas como cachorro fiel", correct: "T" },
+      { question: "Todos julgamos os outros no fundo, é nosso dom", correct: "T" },
+      { question: "As pessoas brigam por besteiras, quem diria", correct: "T" },
+      { question: "Tem gente que vive pro caos, é o gás deles", correct: "T" },
+      { question: "Mudança de humor é real, não é só coisa de adolescente", correct: "T" },
+      { question: "Humanos são super irracionais às vezes, chocante", correct: "T" },
+      { question: "Algumas pessoas adoram se fazer de vítima, é um talento", correct: "T" },
+      { question: "Todo mundo pensa demais de vez em quando, cérebro esperto", correct: "T" },
+      { question: "As pessoas fazem bico quando não ganham o que querem", correct: "T" },
+      { question: "Humanos competem por coisas idiotas, estranho, né?", correct: "T" },
+      { question: "Tem gente que vive pra chamar atenção, oxigênio deles", correct: "T" },
+      { question: "Todo mundo fica chato sem café, lei da vida", correct: "T" },
+      { question: "As pessoas somem porque estão ‘muito ocupadas’, sei", correct: "T" },
+      { question: "Humanos surtam com probleminhas, que fofos", correct: "T" },
+      { question: "Tem gente que já nasce ranzinza, culpa do rosto", correct: "T" },
+      { question: "Todo mundo curte um desabafo bem dado", correct: "T" },
+      { question: "Até os mais barulhentos são inseguros por dentro", correct: "T" },
+      { question: "As pessoas fingem confiança como se fosse Olimpíada", correct: "T" },
+      { question: "Humanos adoram culpar os outros, nunca é com eles", correct: "T" },
+      { question: "Todo mundo quer validação, pode negar à vontade", correct: "T" },
+      { question: "Tem gente que fala só pra se ouvir, impressionante", correct: "T" },
+      { question: "Humanos se entediam rápido demais, triste", correct: "T" },
+      { question: "Todo mundo odeia receber ordens, fato", correct: "T" },
+      { question: "As pessoas amam briga na internet, é o exercício delas", correct: "T" },
+      { question: "Humanos são viciados em likes, super normal", correct: "T" },
+      { question: "Todo mundo finge que tá bem quando não tá", correct: "T" },
+      { question: "Tem gente que não suporta silêncio, assusta", correct: "T" },
+      { question: "As pessoas ficam bravas quando perdem, sempre", correct: "T" },
+      { question: "Todo mundo adora ouvir conversa alheia, é gostoso", correct: "T" },
+      { question: "Humanos piram quando os planos mudam, que exagero", correct: "T" },
+      { question: "Tem gente que fala alto só pra parecer importante", correct: "T" },
+      { question: "Todo mundo já sonhou com uma vingancinha boba", correct: "T" },
+      { question: "As pessoas adoram se mostrar, humildade é papo furado", correct: "T" },
+      { question: "Humanos têm pavor de falar em público, adorável", correct: "T" },
+      { question: "Todo mundo odeia grupos de zap, muito barulho", correct: "T" },
+      { question: "Tem gente que não aceita brincadeira, sem graça", correct: "T" },
+      { question: "As pessoas ficam grudentas quando tão sozinhas, óbvio", correct: "T" },
+      { question: "Todo mundo ama reclamar, é tipo terapia", correct: "T" },
+      { question: "Humanos complicam tudo, é o dom deles", correct: "T" },
+      { question: "Tem gente que faz drama pra ser notada, clássico", correct: "T" },
+      { question: "Todo mundo se irrita com quem anda devagar, universal", correct: "T" },
+      { question: "As pessoas adoram estar certas, é o vício delas", correct: "T" },
+      { question: "Humanos riem de piada ruim por educação", correct: "T" },
+      { question: "Tem gente que não sabe dizer não, azar deles", correct: "T" },
+      { question: "Todo mundo fica convencido quando ganha", correct: "T" },
+      { question: "As pessoas piram de cansaço, tão frágeis", correct: "T" },
+      { question: "Humanos curtem novela pra bisbilhotar a vida alheia", correct: "T" },
+      { question: "Tem gente que não para de falar, é doença", correct: "T" },
+      { question: "Todo mundo odeia quem mastiga alto, é guerra", correct: "T" },
+      { question: "As pessoas ficam estranhas com fome, verdade", correct: "T" },
+      { question: "Humanos adoram fazer mil coisas e estragar tudo", correct: "T" },
+      { question: "Tem gente que ama estresse, é o clima deles", correct: "T" },
+      { question: "Todo mundo briga por vaga de estacionamento, é regra", correct: "T" },
+      { question: "As pessoas odeiam ser interrompidas, é pessoal", correct: "T" },
+      { question: "Humanos piram por coisa grátis, mesmo sendo traste", correct: "T" },
+      { question: "Tem gente que chora por leite derramado, sério", correct: "T" },
+      { question: "Todo mundo ama ganhar uma discussão", correct: "T" },
+      { question: "As pessoas gritam quando tão animadas, exageradas", correct: "T" },
+      { question: "Humanos odeiam segunda-feira, tá no sangue", correct: "T" },
+      { question: "Tem gente que não sabe sussurrar, defeito de fábrica", correct: "T" },
+      { question: "Todo mundo fica preguiçoso sem plateia", correct: "T" },
+      { question: "As pessoas adoram se exibir, modéstia é lorota", correct: "T" },
+      { question: "Humanos surtam com barata, que coragem", correct: "T" },
+      { question: "Tem gente que vive pro holofote, coitados", correct: "T" },
+      { question: "Todo mundo odeia reunião longa, ponto final", correct: "T" },
+      { question: "As pessoas viram drama quando tão doentes, dignas de prêmio", correct: "T" },
+      { question: "Humanos vivem pra fofoca, é o que os move", correct: "T" }
+    ];
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    let quizQuestions = shuffle([...questions]).slice(0, 10);
+    let currentQuestionIndex = 0;
+    let score = 0;
+    const totalQuestions = quizQuestions.length;
+
+    const questionEl = document.getElementById('question');
+    const trueBtn = document.getElementById('true-btn');
+    const falseBtn = document.getElementById('false-btn');
+    const feedbackEl = document.getElementById('feedback');
+    const nextBtn = document.getElementById('next-btn');
+    const scoreEl = document.getElementById('score');
+    const resultEl = document.getElementById('result');
+    const resultTextEl = document.getElementById('result-text');
+    const playAgainBtn = document.getElementById('play-again-btn');
+
+    function displayQuestion() {
+      const currentQuestion = quizQuestions[currentQuestionIndex];
+      questionEl.textContent = currentQuestion.question;
+      questionEl.classList.add('fade-in');
+      setTimeout(() => questionEl.classList.remove('fade-in'), 500);
+      feedbackEl.style.display = 'none';
+      nextBtn.style.display = 'none';
+      trueBtn.disabled = false;
+      falseBtn.disabled = false;
+      scoreEl.textContent = `Acertos: ${score} / Total: ${totalQuestions}`;
+    }
+
+    displayQuestion();
+
+    function checkAnswer(answer) {
+      const currentQuestion = quizQuestions[currentQuestionIndex];
+      if (answer === currentQuestion.correct) {
+        feedbackEl.textContent = "Acertou! Até que você manja, hein!";
+        feedbackEl.style.color = '#4CAF50';
+        score++;
+      } else {
+        feedbackEl.textContent = `Errou feio! Era ${currentQuestion.correct === 'T' ? 'Verdadeiro' : 'Falso'}, óbvio. Tenta de novo, vai`;
+        feedbackEl.style.color = '#f44336';
+      }
+      feedbackEl.style.display = 'block';
+      feedbackEl.classList.add('fade-in');
+      setTimeout(() => feedbackEl.classList.remove('fade-in'), 500);
+      trueBtn.disabled = true;
+      falseBtn.disabled = true;
+      nextBtn.style.display = 'block';
+    }
+
+    trueBtn.addEventListener('click', () => checkAnswer('T'));
+    falseBtn.addEventListener('click', () => checkAnswer('F'));
+
+    nextBtn.addEventListener('click', () => {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < totalQuestions) {
+        displayQuestion();
+      } else {
+        showResults();
+      }
+    });
+
+    function showResults() {
+      const percentage = (score / totalQuestions) * 100;
+      let message;
+      if (percentage === 100) {
+        message = "Mandou bem demais! É um gênio ou só deu sorte?";
+      } else if (percentage >= 70) {
+        message = "Tá quase lá! Dá pra enganar que você entende de gente.";
+      } else {
+        message = "Foi mal, hein? Talvez você seja melhor em assistir novela.";
+      }
+      resultTextEl.textContent = `Você acertou ${score} de ${totalQuestions} (${percentage}%). ${message}`;
+      questionEl.style.display = 'none';
+      trueBtn.style.display = 'none';
+      falseBtn.style.display = 'none';
+      feedbackEl.style.display = 'none';
+      nextBtn.style.display = 'none';
+      scoreEl.style.display = 'none';
+      resultEl.style.display = 'block';
+      resultEl.classList.add('fade-in');
+    }
+
+    playAgainBtn.addEventListener('click', () => {
+      quizQuestions = shuffle([...questions]).slice(0, 10);
+      currentQuestionIndex = 0;
+      score = 0;
+      resultEl.style.display = 'none';
+      questionEl.style.display = 'block';
+      trueBtn.style.display = 'inline-block';
+      falseBtn.style.display = 'inline-block';
+      scoreEl.style.display = 'block';
+      displayQuestion();
+    });
+  </script>
+</body>
+</html>
